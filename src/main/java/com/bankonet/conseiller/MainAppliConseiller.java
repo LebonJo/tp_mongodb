@@ -63,7 +63,7 @@ public class MainAppliConseiller {
 				}
 			}
 			else{
-				System.out.println("Saisie erronnée !");
+				System.out.println("Option non valide !");
 			}
 		}
 		

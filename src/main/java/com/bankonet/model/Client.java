@@ -14,6 +14,9 @@ public class Client{
 	private List<Compte> compteCourantList = new ArrayList<Compte>();
 	private List<Compte> compteEpargneList = new ArrayList<Compte>();
 	
+	// Constructeur par défaut
+	public Client(){};
+	
 	// Constructeur
 	public Client(String nom, String prenom, String login, String password){
 		this.nom = nom;

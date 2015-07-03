@@ -111,4 +111,32 @@ public class BanqueDao {
 		return result;
 	}
 
+	public Client getClient(String login, String password) {
+		
+		FindIterable<Document> clientsIterable = clients.find(new Document().append("login", login).append("password", password));
+		Iterator<Document> clientsIterator = clientsIterable.iterator();
+		if(clientsIterator.hasNext()){
+			Document clientFound = clientsIterator.next();
+			
+			List<Document> docCC = (List<Document>) clientFound.get("comptesCourants");
+			List<Compte> listComptesCourants = new ArrayList<Compte>(); 
+			for(Document doc : docCC){
+				CompteCourant compte = new CompteCourant(doc.getString("libelle"), new Float(doc.getDouble("solde")));
+				listComptesCourants.add(compte);
+			}
+			
+			List<Document> docCE = (List<Document>) clientFound.get("comptesEpargnes");
+			List<Compte> listComptesEpargnes = new ArrayList<Compte>(); 
+			for(Document doc : docCE){
+				CompteEpargne compte = new CompteEpargne(doc.getString("libelle"), new Float(doc.getDouble("solde")));
+				listComptesEpargnes.add(compte);
+			}
+			
+			return new Client(clientFound.getObjectId("_id").toString(), clientFound.getString("nom"), clientFound.getString("prenom"),
+								clientFound.getString("login"), clientFound.getString("password"), listComptesCourants, listComptesEpargnes);
+		} else {
+			return null;
+		}
+	}
+
 }
