@@ -49,6 +49,32 @@ public class MainAppliClient {
 					} else {
 						System.out.println("Mauvais numéro !");
 					}
+				} else if(input.equals("3")){
+					user.afficherCompte();
+					System.out.println("Veuillez choisir le numéro du compte à débiter");
+					int indice = Integer.parseInt(inputScan.nextLine());
+					Compte cptADebiter = user.getCompte(indice);
+					if(cptADebiter != null){
+						boolean inRetrait = true;
+						while(inRetrait){
+							System.out.println("Veuillez choisir le montant à débiter");
+							float montant = new Float(inputScan.nextLine());
+							if(montant == 0){
+								System.out.println("Abandon");
+								inRetrait = false;
+							} else {
+								inRetrait = !cptADebiter.debiter(montant);
+								database.updateClient(user);
+								if(inRetrait){
+									System.out.println("Montant invalide");
+								} else {
+									System.out.println("Retrait validé ! Le nouveau solde est de : " + cptADebiter.getSolde());
+								}
+							}
+						}
+					} else {
+						System.out.println("Mauvais numéro !");
+					}
 				} else {
 					System.out.println("Option non valide !");
 				}
@@ -69,6 +95,7 @@ public class MainAppliClient {
 					System.out.println("0. Arreter le programme");
 					System.out.println("1. Consulter les soldes des comptes");
 					System.out.println("2. Effectuer un dépôt");
+					System.out.println("3. Effectuer un retrait");
 					System.out.println("\n");
 				} else {
 					System.out.println("Identifiants incorrects !");

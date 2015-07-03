@@ -66,4 +66,15 @@ public abstract class Compte{
 	}
 	
 	public abstract String getTypeCompte();
+
+	public boolean debiter(float montant) {
+		boolean isAutorise = (this.solde - montant > 0);
+		if(!isAutorise){
+			return isAutorise;
+		}
+		else{
+			this.solde = this.solde - montant;
+			return isAutorise;
+		}
+	}
 }
