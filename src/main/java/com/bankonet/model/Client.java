@@ -90,4 +90,19 @@ public class Client{
 	public String toString(){
 		return "ID: " + getIdentifiant() + ", NOM : " + getNom() + ", PRENOM : " + getPrenom() + ", LOGIN : " + getLogin() + ", NB CC ; " + getNbCC() + ", NB CE : " + getNbCE();
 	}
+
+	public void afficherCompte() {
+		List<Compte> listComptes = this.getComptes();
+		for(Compte compte : listComptes){
+			System.out.println(compte.toString());
+		}
+	}
+	
+	public Compte getCompte(int idCompte){
+		List<Compte> listComptes = this.getComptes();
+		for(Compte compte : listComptes){
+			if(idCompte == compte.getIdentifiant()) return compte;
+		}
+		return null;
+	}
 }

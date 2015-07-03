@@ -7,6 +7,7 @@ import java.util.List;
 import org.bson.Document;
 
 import com.bankonet.Compte;
+import com.bankonet.Compte.TypeCompte;
 import com.bankonet.model.Client;
 import com.bankonet.model.CompteCourant;
 import com.bankonet.model.CompteEpargne;
@@ -51,7 +52,7 @@ public class BanqueDao {
 			List<Document> listComptesCourants = (List<Document>) clientFound.get("comptesCourants");
 			List<Document> listComptesEpargnes = (List<Document>) clientFound.get("comptesEpargnes");
 			String libelleCree =  clientName + "_" + clientFName + "_COURANT_" + (listComptesCourants.size()+1);
-			listComptesCourants.add(new Document().append("libelle", libelleCree).append("solde", 0f));
+			listComptesCourants.add(new Document().append("identifiant", listComptesCourants.size()+1).append("libelle", libelleCree).append("solde", 0f));
 			clients.updateOne(
 				new Document()
 					.append("nom", clientName)
@@ -69,7 +70,7 @@ public class BanqueDao {
 		else{
 			List<Document> listComptesCourants = new ArrayList<Document>();
 			String libelleCree =  clientName + "_" + clientFName + "_COURANT_1";
-			listComptesCourants.add(new Document().append("libelle", libelleCree).append("solde", 0f));
+			listComptesCourants.add(new Document().append("identifiant", 1).append("libelle", libelleCree).append("solde", 0f));
 			List<Document> listComptesEpargnes = new ArrayList<Document>();
 			clients.insertOne(
 				new Document()
@@ -93,14 +94,14 @@ public class BanqueDao {
 			List<Document> docCC = (List<Document>) clientFound.get("comptesCourants");
 			List<Compte> listComptesCourants = new ArrayList<Compte>(); 
 			for(Document doc : docCC){
-				CompteCourant compte = new CompteCourant(doc.getString("libelle"), new Float(doc.getDouble("solde")));
+				CompteCourant compte = new CompteCourant(doc.getInteger("identifiant"), doc.getString("libelle"), new Float(doc.getDouble("solde")));
 				listComptesCourants.add(compte);
 			}
 			
 			List<Document> docCE = (List<Document>) clientFound.get("comptesEpargnes");
 			List<Compte> listComptesEpargnes = new ArrayList<Compte>(); 
 			for(Document doc : docCE){
-				CompteEpargne compte = new CompteEpargne(doc.getString("libelle"), new Float(doc.getDouble("solde")));
+				CompteEpargne compte = new CompteEpargne(doc.getInteger("identifiant"), doc.getString("libelle"), new Float(doc.getDouble("solde")));
 				listComptesEpargnes.add(compte);
 			}
 			
@@ -119,16 +120,16 @@ public class BanqueDao {
 			Document clientFound = clientsIterator.next();
 			
 			List<Document> docCC = (List<Document>) clientFound.get("comptesCourants");
-			List<Compte> listComptesCourants = new ArrayList<Compte>(); 
+			List<Compte> listComptesCourants = new ArrayList<Compte>();
 			for(Document doc : docCC){
-				CompteCourant compte = new CompteCourant(doc.getString("libelle"), new Float(doc.getDouble("solde")));
+				CompteCourant compte = new CompteCourant(doc.getInteger("identifiant"), doc.getString("libelle"), new Float(doc.getDouble("solde")));
 				listComptesCourants.add(compte);
 			}
 			
 			List<Document> docCE = (List<Document>) clientFound.get("comptesEpargnes");
 			List<Compte> listComptesEpargnes = new ArrayList<Compte>(); 
 			for(Document doc : docCE){
-				CompteEpargne compte = new CompteEpargne(doc.getString("libelle"), new Float(doc.getDouble("solde")));
+				CompteEpargne compte = new CompteEpargne(doc.getInteger("identifiant"), doc.getString("libelle"), new Float(doc.getDouble("solde")));
 				listComptesEpargnes.add(compte);
 			}
 			
@@ -137,6 +138,42 @@ public class BanqueDao {
 		} else {
 			return null;
 		}
+	}
+	
+	public void updateClient(Client client){
+		
+		String clientName = client.getNom();
+		String clientFName = client.getPrenom();
+		String clientLogin = client.getLogin();
+		String clientMdp = client.getPassword();
+		List<Compte> listComptes = client.getComptes();
+		
+		List<Document> listDocsCC = new ArrayList<Document>();
+		List<Document> listDocsCE = new ArrayList<Document>();
+		
+		for(Compte compte : listComptes){
+			if(compte.getTypeCompte().equals(TypeCompte.COURANT)){
+				String libelleCree =  clientName + "_" + clientFName + "_COURANT_" + compte.getIdentifiant();
+				listDocsCC.add(new Document().append("identifiant", compte.getIdentifiant()).append("libelle", libelleCree).append("solde", compte.getSolde()));
+			}
+			else if(compte.getTypeCompte().equals(TypeCompte.EPARGNE)){
+				String libelleCree =  clientName + "_" + clientFName + "_EPARGNE_" + compte.getIdentifiant();
+				listDocsCC.add(new Document().append("identifiant", compte.getIdentifiant()).append("libelle", libelleCree).append("solde", compte.getSolde()));
+			}
+		}
+		
+		clients.updateOne(
+				new Document()
+					.append("nom", clientName)
+					.append("prenom", clientFName)
+					.append("login", clientLogin),
+				new Document("$set" , new Document()
+					.append("nom", clientName)
+					.append("prenom", clientFName)
+					.append("login", clientLogin)
+					.append("password", clientMdp)
+					.append("comptesCourants", listDocsCC)
+					.append("comptesEpargnes", listDocsCE)));
 	}
 
 }

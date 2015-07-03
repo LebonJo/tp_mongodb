@@ -34,9 +34,20 @@ public class MainAppliClient {
 				} else if(input.equals("1")){
 					//-- Pas besoin d'appeler la base puisque j'ai reconstruit mon client à partir de cette dernière
 					//-- je n'ai donc plus qu'à afficher les comptes de l'objet user
-					List<Compte> listComptes = user.getComptes();
-					for(Compte compte : listComptes){
-						System.out.println(compte.toString());
+					user.afficherCompte();
+				} else if(input.equals("2")){
+					user.afficherCompte();
+					System.out.println("Veuillez choisir le numéro du compte à créditer");
+					int indice = Integer.parseInt(inputScan.nextLine());
+					Compte cptACrediter = user.getCompte(indice);
+					if(cptACrediter != null){
+						System.out.println("Veuillez choisir le montant à créditer");
+						float montant = new Float(inputScan.nextLine());
+						cptACrediter.crediter(montant);
+						database.updateClient(user);
+						System.out.println("Virement validé ! Le nouveau solde est de : " + cptACrediter.getSolde());
+					} else {
+						System.out.println("Mauvais numéro !");
 					}
 				} else {
 					System.out.println("Option non valide !");
@@ -57,6 +68,7 @@ public class MainAppliClient {
 					System.out.println("\n");
 					System.out.println("0. Arreter le programme");
 					System.out.println("1. Consulter les soldes des comptes");
+					System.out.println("2. Effectuer un dépôt");
 					System.out.println("\n");
 				} else {
 					System.out.println("Identifiants incorrects !");
