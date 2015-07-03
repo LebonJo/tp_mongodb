@@ -76,10 +76,14 @@ public class Client{
 		return this.compteEpargneList.size();
 	}
 	
-	public List getComptes(){
-		List result = new ArrayList();
-		result.add(this.compteCourantList);
-		result.add(this.compteEpargneList);
+	public List<Compte> getComptes(){
+		List<Compte> result = new ArrayList<Compte>();
+		for(Compte compte : this.compteCourantList){
+			result.add(compte);
+		}
+		for(Compte compte : this.compteEpargneList){
+			result.add(compte);
+		}
 		return result;
 	}
 	
