@@ -6,6 +6,10 @@ import java.util.List;
 
 import org.bson.Document;
 
+import com.bankonet.Compte;
+import com.bankonet.model.Client;
+import com.bankonet.model.CompteCourant;
+import com.bankonet.model.CompteEpargne;
 import com.mongodb.MongoClient;
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
@@ -28,13 +32,16 @@ public class BanqueDao {
 	}
 	
 	// Création d'un nouveau compte
-	public void insertNewCompte(String clientName, String clientFName, String clientLogin, String clientMdp){
+	public void insertNewCompte(Client client){
+		
+		String clientName = client.getNom();
+		String clientFName = client.getPrenom();
+		String clientLogin = client.getLogin();
+		String clientMdp = client.getPassword();
 		
 		//-- on cherche si un document est déjà présent concernant le meme client
-		FindIterable<Document> result = clients.find(new Document()
-				.append("nom", clientName)
-				.append("prenom", clientFName)
-				.append("login", clientLogin));
+		//-- je me sers du login comme discriminant (il sera donc unique)
+		FindIterable<Document> result = clients.find(new Document().append("login", client.getLogin()));
 		
 		Iterator<Document> iterator = result.iterator();
 		
@@ -73,6 +80,35 @@ public class BanqueDao {
 					.append("comptesCourants", listComptesCourants)
 					.append("comptesEpargnes", listComptesEpargnes));
 		}
+	}
+
+	public List<Client> getAllClients() {
+		List<Client> result = new ArrayList<Client>();
+		
+		FindIterable<Document> clientsIterable = clients.find();
+		Iterator<Document> clientsIterator = clientsIterable.iterator();
+		while(clientsIterator.hasNext()){
+			Document clientFound = clientsIterator.next();
+			
+			List<Document> docCC = (List<Document>) clientFound.get("comptesCourants");
+			List<Compte> listComptesCourants = new ArrayList<Compte>(); 
+			for(Document doc : docCC){
+				CompteCourant compte = new CompteCourant(doc.getString("libelle"), new Float(doc.getDouble("solde")));
+				listComptesCourants.add(compte);
+			}
+			
+			List<Document> docCE = (List<Document>) clientFound.get("comptesEpargnes");
+			List<Compte> listComptesEpargnes = new ArrayList<Compte>(); 
+			for(Document doc : docCE){
+				CompteEpargne compte = new CompteEpargne(doc.getString("libelle"), new Float(doc.getDouble("solde")));
+				listComptesEpargnes.add(compte);
+			}
+			
+			result.add(new Client(clientFound.getObjectId("_id").toString(), clientFound.getString("nom"), clientFound.getString("prenom"),
+								clientFound.getString("login"), clientFound.getString("password"), listComptesCourants, listComptesEpargnes));
+		}
+		
+		return result;
 	}
 
 }

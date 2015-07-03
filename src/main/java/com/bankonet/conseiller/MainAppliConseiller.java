@@ -11,6 +11,7 @@ import org.bson.Document;
 import org.bson.conversions.Bson;
 
 import com.bankonet.dao.BanqueDao;
+import com.bankonet.model.Client;
 import com.bankonet.model.CompteCourant;
 import com.mongodb.MongoClient;
 import com.mongodb.client.FindIterable;
@@ -29,6 +30,7 @@ public class MainAppliConseiller {
 		System.out.println("\n");
 		System.out.println("0. Arreter le programme");
 		System.out.println("1. Ouvrir un compte");
+		System.out.println("2. Liste des clients");
 		System.out.println("\n");
 		
 		Scanner inputScan = new Scanner(System.in);
@@ -41,8 +43,7 @@ public class MainAppliConseiller {
 				System.out.println("Arrêt de l'application");
 				boucle = false;
 				break;
-			}
-			if(input.equals("1")){
+			} else if(input.equals("1")){
 				System.out.println("Veuillez saisir le nom du client : ");
 				String clientName = inputScan.nextLine();
 				System.out.println("Veuillez saisir le prénom du client : ");
@@ -50,12 +51,19 @@ public class MainAppliConseiller {
 				System.out.println("Veuillez saisir le login du client : ");
 				String clientLogin = inputScan.nextLine();
 				String clientMdp = "secret";
+				System.out.println("Création du compte");
 				
-				database.insertNewCompte(clientName, clientFName, clientLogin, clientMdp);
-								
+				Client client = new Client(clientName, clientFName, clientLogin, clientMdp);
+				
+				database.insertNewCompte(client);
+			} else if(input.equals("2")){
+				List<Client> clients = database.getAllClients();
+				for(Client client : clients){
+					System.out.println(client.toString());
+				}
 			}
 			else{
-				System.out.println("Saisie erronnée. Veuillez choisir une option");
+				System.out.println("Saisie erronnée !");
 			}
 		}
 		
